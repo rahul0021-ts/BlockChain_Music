@@ -19,12 +19,16 @@ connectDB();
 const app = express();
 
 // Middlewares
-app.use(
-  cors({
-    origin: "*",      // allow Netlify + mobile
-    credentials: true
-  })
-);
+// ✅ CORS (mobile-safe, Netlify + Render)
+app.use(cors({
+  origin: "*", // allow all origins
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true
+}));
+
+// ✅ Preflight support for mobile
+app.options("*", cors());
 
 
 
