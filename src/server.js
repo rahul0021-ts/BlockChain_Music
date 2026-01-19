@@ -19,7 +19,15 @@ connectDB();
 const app = express();
 
 // Middlewares
-app.use(cors());
+app.use(
+  cors({
+    origin: "*",      // allow Netlify + mobile
+    credentials: true
+  })
+);
+
+
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -40,6 +48,6 @@ app.use(errorMiddleware);
 
 // Server start
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () =>
+app.listen(PORT,"0.0.0.0", () =>
   console.log(`🔥 Server running on http://localhost:${PORT}`)
 );
