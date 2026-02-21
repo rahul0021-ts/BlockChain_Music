@@ -2,52 +2,49 @@
 import { ethers } from "ethers";
 import { provider, wallet } from "../config/web3.js";
 import dotenv from "dotenv";
+import fs from "fs";
+
 dotenv.config();
 
-// Load contract ABI and address
-import fs from "fs";
-const abi = JSON.parse(fs.readFileSync("src/abis/RoyaltyDistributor.json", "utf-8"));
+// Load contract ABI
+const abi = JSON.parse(
+  fs.readFileSync("src/abis/RoyaltyDistributor.json", "utf-8")
+);
+
 const contractAddress = process.env.CONTRACT_ADDRESS;
 
-// Contract instance
-export const contract = new ethers.Contract(contractAddress, abi, wallet);
+if (!contractAddress) {
+  throw new Error("CONTRACT_ADDRESS not defined in environment variables");
+}
+
+// Contract instance (admin signer for backend-only actions)
+export const contract = new ethers.Contract(
+  contractAddress,
+  abi,
+  wallet
+);
 
 /**
- * Add song on-chain
- * @param {string} title
- * @param {Array<string>} contributors
- * @param {Array<number>} shares
- * @param {number} royaltyPeriodDays
+ * Add song on-chain (Admin Only)
+ * - title: string
+ * - contributors: array of addresses
+ * - shares: array of numbers (sum 100)
  */
-export const addSongOnChain = async (title, contributors, shares, royaltyPeriodDays) => {
-  const tx = await contract.registerSong(title, contributors, shares, royaltyPeriodDays);
-  const receipt = await tx.wait();
-  return receipt;
+export const addSongOnChain = async (title, contributors, shares) => {
+  const tx = await contract.registerSong(title, contributors, shares);
+  return await tx.wait();
 };
 
 /**
- * Record payment (buy song)
- * @param {number|string} songId
- * @param {string} valueInEth
- */
-export const recordPayment = async (songId, valueInEth) => {
-  const tx = await contract.recordPayment(songId, { value: ethers.parseEther(valueInEth) });
-  const receipt = await tx.wait();
-  return receipt;
-};
-
-/**
- * Withdraw royalty for connected wallet
+ * Withdraw royalty (Admin/Platform Wallet)
  */
 export const withdrawRoyalty = async () => {
   const tx = await contract.withdraw();
-  const receipt = await tx.wait();
-  return receipt;
+  return await tx.wait();
 };
 
 /**
  * Get on-chain balance for wallet
- * @param {string} walletAddress
  */
 export const getBalance = async (walletAddress) => {
   const balance = await contract.getBalance(walletAddress);
