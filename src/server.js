@@ -21,7 +21,7 @@ const app = express();
 // Middlewares
 // ✅ CORS (mobile-safe, Netlify + Render)
 app.use(cors({
-  origin: "*", // allow all origins
+  origin: "http://localhost:3000", // allow all origins
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true
